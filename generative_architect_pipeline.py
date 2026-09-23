@@ -87,12 +87,20 @@ class GenerativeArchitectEngine:
                     size="1024x1024",
                     n=1
                 )
-                img_url = resp.data[0].url
-                img_res = requests.get(img_url, timeout=30)
-                if img_res.status_code == 200:
+                item = resp.data[0]
+                img_bytes = None
+                if getattr(item, "b64_json", None):
+                    import base64
+                    img_bytes = base64.b64decode(item.b64_json)
+                elif getattr(item, "url", None):
+                    img_res = requests.get(item.url, timeout=30)
+                    if img_res.status_code == 200:
+                        img_bytes = img_res.content
+                
+                if img_bytes:
                     filename = f"generative_output/gpt_flare_{int(time.time()*1000)}.jpg"
                     with open(filename, "wb") as f:
-                        f.write(img_res.content)
+                        f.write(img_bytes)
                     print(f"  ✅ تم التوليد بنجاح عبر GPT Image 2.5 Flare!")
                     return filename
             except Exception as e:
@@ -176,9 +184,47 @@ class GenerativeArchitectEngine:
                 time.sleep(2)
 
         if not response:
-            raise RuntimeError("تعذر تحليل الصورة عبر نماذج الذكاء الاصطناعي")
-        
-        raw_text = response.text.strip()
+            raw_text = None
+            if config.XKIRO_API_KEY:
+                print(f"  🔄 تفعيل محرك XKiro AI ({config.XKIRO_MODEL}) كبديل ذكي...")
+                try:
+                    from openai import OpenAI
+                    ai_client = OpenAI(api_key=config.XKIRO_API_KEY, base_url=config.XKIRO_BASE_URL)
+                    resp = ai_client.chat.completions.create(
+                        model=config.XKIRO_MODEL,
+                        messages=[
+                            {"role": "system", "content": "أنت مهندس معماري استشاري وخبير محتوى رقمي. أخرج كائن JSON صالح فقط بدون أي مقدمات."},
+                            {"role": "user", "content": analysis_prompt}
+                        ]
+                    )
+                    raw_text = resp.choices[0].message.content.strip()
+                except Exception as e:
+                    print(f"  ⚠️ تنبيه محرك XKiro: {e}")
+
+            if not raw_text and config.IMAGE_API_KEY:
+                print("  🔄 تفعيل المحرك البديل (GPT-4o-mini) عبر CometAPI...")
+                try:
+                    from openai import OpenAI
+                    base_url = config.IMAGE_BASE_URL or "https://api.cometapi.com/v1"
+                    if not base_url.endswith("/v1"):
+                        base_url = f"{base_url.rstrip('/')}/v1"
+                    ai_client = OpenAI(api_key=config.IMAGE_API_KEY, base_url=base_url)
+                    resp = ai_client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[
+                            {"role": "system", "content": "أنت مهندس معماري استشاري وخبير محتوى رقمي. أخرج كائن JSON صالح فقط بدون أي مقدمات."},
+                            {"role": "user", "content": analysis_prompt}
+                        ]
+                    )
+                    raw_text = resp.choices[0].message.content.strip()
+                except Exception as e:
+                    print(f"  ⚠️ فشل المحرك البديل: {e}")
+                    raise RuntimeError("تعذر تحليل الصورة عبر نماذج الذكاء الاصطناعي")
+
+            if not raw_text:
+                raise RuntimeError("تعذر تحليل الصورة عبر نماذج الذكاء الاصطناعي")
+        else:
+            raw_text = response.text.strip()
         if "```json" in raw_text:
             raw_text = raw_text.split("```json")[1].split("```")[0].strip()
         elif "```" in raw_text:

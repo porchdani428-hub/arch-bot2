@@ -54,12 +54,25 @@ class ContentPipeline:
 
         post_data = repurpose_res["data"]
         
-        print("\n[3/4] 🎨 جاري تصميم شرائح الكاروسيل المعمارية بجودة عالية...")
-        image_paths = self.render_slides(post_data)
+        bg_image_path = media_path
+        if not bg_image_path or not os.path.exists(bg_image_path):
+            print("\n[3/5] 🏛️ جاري توليد خلفية معمارية مخصصة (Luxury Villa Architecture)...")
+            from generative_architect_pipeline import GenerativeArchitectEngine
+            try:
+                gen_engine = GenerativeArchitectEngine()
+                villa_prompt = "ultra modern luxury villa facade, floor-to-ceiling glass windows, warm interior illumination, concrete cantilevers, minimal reflection pool, dusk twilight sunset, photorealistic 8k architectural digest"
+                bg_image_path = gen_engine.generate_image(villa_prompt, width=1080, height=1350)
+                print(f"  ✅ تم توليد خلفية معمارية بنجاح: {bg_image_path}")
+            except Exception as e:
+                print(f"  ⚠️ تعذر توليد صورة الخلفية: {e}")
+                bg_image_path = None
+        
+        print("\n[4/5] 🎨 جاري تصميم شرائح الكاروسيل المعمارية بخلفيات الفيلات الفاخرة...")
+        image_paths = self.render_slides(post_data, bg_image_path=bg_image_path)
         
         caption = post_data.get("instagram_caption", "")
         
-        print(f"\n[4/4] 🚀 جاري إرسال {len(image_paths)} شرائح مع الكابشن إلى تيليغرام...")
+        print(f"\n[5/5] 🚀 جاري إرسال {len(image_paths)} شرائح مع الكابشن إلى تيليغرام...")
         if self.telegram:
             success = self.telegram.send_carousel(image_paths, caption)
             if success:
@@ -73,7 +86,7 @@ class ContentPipeline:
             print(f"الكابشن المقترح:\n{caption}")
             return True
 
-    def render_slides(self, post_data: Dict[str, Any]) -> List[str]:
+    def render_slides(self, post_data: Dict[str, Any], bg_image_path: Optional[str] = None) -> List[str]:
         timestamp = int(time.time())
         out_dir = os.path.join("output", f"post_{timestamp}")
         os.makedirs(out_dir, exist_ok=True)
@@ -92,7 +105,8 @@ class ContentPipeline:
             title=cover_data.get("title", "نصيحة معمارية هامة"),
             subtitle=cover_data.get("subtitle", "تفاصيل هندسية ترفع من جودة العمل"),
             category=category,
-            total_slides=total_slides
+            total_slides=total_slides,
+            bg_image_path=bg_image_path
         )
         cover_path = os.path.join(out_dir, f"slide_{current_slide:02d}.png")
         cover_img.save(cover_path)
@@ -111,7 +125,8 @@ class ContentPipeline:
                 category=category,
                 headline=headline,
                 bullets=bullets,
-                tip=tip
+                tip=tip,
+                bg_image_path=bg_image_path
             )
             c_path = os.path.join(out_dir, f"slide_{current_slide:02d}.png")
             c_img.save(c_path)
@@ -127,7 +142,8 @@ class ContentPipeline:
                 total_slides=total_slides,
                 category=category,
                 summary_points=summary,
-                cta_text=cta_txt
+                cta_text=cta_txt,
+                bg_image_path=bg_image_path
             )
             cta_path = os.path.join(out_dir, f"slide_{current_slide:02d}.png")
             cta_img.save(cta_path)
