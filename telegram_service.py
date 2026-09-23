@@ -1,4 +1,4 @@
-﻿import os
+import os
 import time
 import json
 import requests
@@ -123,18 +123,16 @@ class TelegramService:
                         
                     if text.startswith("/start"):
                         self.send_message(
-                            "مرحباً بك يا باشمهندس! 👋🏛️\n\n"
-                            "أرسل لي أي رابط منشور أو ريل إنستغرام، وسأقوم بتحليله، وإعادة صياغته بأسلوبك المعماري، "
-                            "ثم تصميم شرائح الكاروسيل وإرسالها لك مع الكابشن الجاهز للنشر! 🚀",
+                            "مرحباً بك في أستوديو MK ARCHVIZ الذكي! 🏛️✨\n\n"
+                            "يمكنك إرسال أي مما يلي من هاتفك:\n"
+                            "1️⃣ أمر توليد من الصفر: أرسل `/generate` أو `توليد`.\n"
+                            "2️⃣ رابط إنستغرام: لتحليله واستخراج لوحة المفاهيم وتصميم الكاروسيل.\n"
+                            "3️⃣ أي فكرة أو موضوع معماري: مثل (تربص 18 شهر، نصائح BIM، مواد الإكساء) وسأقوم بكتابة وتصميم كاروسيل كامل عنها! 🚀",
                             reply_to_message_id=msg_id
                         )
                         continue
                         
-                    if "instagram.com" in text or "http" in text:
-                        self.send_message("⏳ جاري تحليل المنشور واستخراج النصائح وتصميم الكاروسيل المعماري...", reply_to_message_id=msg_id)
-                        process_callback(text, msg_id)
-                    else:
-                        self.send_message("يرجى إرسال رابط إنستغرام صحيح للبدء في تحليله 📲", reply_to_message_id=msg_id)
+                    process_callback(text, msg_id)
                         
             except requests.exceptions.RequestException:
                 time.sleep(5)

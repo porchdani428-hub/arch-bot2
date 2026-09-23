@@ -5,17 +5,17 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 
 def find_arabic_font(bold: bool = False):
+    font_name = 'arialbd.ttf' if bold else 'arial.ttf'
     candidates = [
+        os.path.join(os.path.dirname(__file__), 'assets', 'fonts', font_name),
+        f'/app/assets/fonts/{font_name}',
         'C:/Windows/Fonts/arialbd.ttf' if bold else 'C:/Windows/Fonts/arial.ttf',
-        os.path.join(os.path.dirname(__file__), 'assets', 'fonts', 'Cairo.ttf'),
-        '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' if bold else '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-        '/usr/share/fonts/opentype/noto/NotoSansArabic-Bold.ttf' if bold else '/usr/share/fonts/opentype/noto/NotoSansArabic-Regular.ttf',
-        'arial.ttf'
+        font_name
     ]
     for p in candidates:
         if os.path.exists(p):
             return p
-    return 'arial.ttf'
+    return font_name
 
 FONT_BOLD = find_arabic_font(True)
 FONT_REGULAR = find_arabic_font(False)
