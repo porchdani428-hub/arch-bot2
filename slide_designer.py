@@ -236,20 +236,8 @@ class ArchitecturalSlideDesigner:
                 draw.polygon([(bx, by-8), (bx+8, by), (bx, by+8), (bx-8, by)], fill=self.COLOR_ACCENT)
                 for line in bullet_lines:
                     draw.text((self.WIDTH - margin - cx_pad - 35, y_cursor), prepare_arabic(line), font=self.font_bullet, fill=self.COLOR_TEXT_PRIMARY, anchor='rt')
-                    y_cursor += 52
-                y_cursor += 25
-
-            if tip:
-                tip_box_top = card_bottom - 210
-                draw.rounded_rectangle([(margin + 30, tip_box_top), (self.WIDTH - margin - 30, card_bottom - 35)], 
-                                       radius=16, fill=(35, 28, 20), outline=self.COLOR_ACCENT, width=2)
-                badge_lbl = prepare_arabic('• إضاءة معمارية للموقع •')
-                draw.text((self.WIDTH - margin - 55, tip_box_top + 22), badge_lbl, font=self.font_tag, fill=self.COLOR_ACCENT, anchor='rt')
-                tip_lines = wrap_text(tip, self.font_tip, content_w - 40, draw)
-                ty = tip_box_top + 70
-                for line in tip_lines:
-                    draw.text((self.WIDTH - margin - 55, ty), prepare_arabic(line), font=self.font_tip, fill=self.COLOR_TEXT_PRIMARY, anchor='rt')
-                    ty += 46
+                    y_cursor += 54
+                y_cursor += 30
 
             return img
 
@@ -281,20 +269,6 @@ class ArchitecturalSlideDesigner:
                 draw.text((self.WIDTH - margin - 35, y_cursor), prep, font=self.font_bullet, fill=self.COLOR_TEXT_PRIMARY, anchor='rt')
                 y_cursor += 52
             y_cursor += 25
-            
-        if tip:
-            box_top = max(y_cursor + 30, 890)
-            box_bottom = min(box_top + 240, self.HEIGHT - 170)
-            draw.rounded_rectangle([(margin, box_top), (self.WIDTH - margin, box_bottom)], radius=18, 
-                                   fill=self.COLOR_TIP_BG, outline=self.COLOR_TIP_BORDER, width=2)
-            badge_lbl = prepare_arabic('[ نصيحة الموقع الهندسية ]')
-            draw.text((self.WIDTH - margin - 35, box_top + 28), badge_lbl, font=self.font_tag, fill=self.COLOR_ACCENT, anchor='rt')
-            tip_lines = wrap_text(tip, self.font_tip, content_w - 70, draw)
-            tip_y = box_top + 80
-            for line in tip_lines:
-                prep = prepare_arabic(line)
-                draw.text((self.WIDTH - margin - 35, tip_y), prep, font=self.font_tip, fill=self.COLOR_TEXT_PRIMARY, anchor='rt')
-                tip_y += 46
                 
         return img
 
