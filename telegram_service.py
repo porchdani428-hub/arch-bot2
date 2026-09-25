@@ -121,18 +121,28 @@ class TelegramService:
                     if not text:
                         continue
                         
-                    if text.startswith("/start"):
-                        self.send_message(
-                            "مرحباً بك في أستوديو MK ARCHVIZ الذكي! 🏛️✨\n\n"
-                            "يمكنك إرسال أي مما يلي من هاتفك:\n"
-                            "1️⃣ أمر توليد من الصفر: أرسل `/generate` أو `توليد`.\n"
-                            "2️⃣ رابط إنستغرام: لتحليله واستخراج لوحة المفاهيم وتصميم الكاروسيل.\n"
-                            "3️⃣ أي فكرة أو موضوع معماري: مثل (تربص 18 شهر، نصائح BIM، مواد الإكساء) وسأقوم بكتابة وتصميم كاروسيل كامل عنها! 🚀",
-                            reply_to_message_id=msg_id
+                    if text.startswith("/start") or text.startswith("/help") or text in ["مساعدة", "تعليمات"]:
+                        welcome_msg = (
+                            "مرحباً بك في أستوديو MK ARCHVIZ المعماري الذكي! 🏛️✨\n\n"
+                            "الخيارات والأوامر المتاحة لك من هاتفك مباشرة:\n"
+                            "━━━━━━━━━━━━━━━━━━━━\n"
+                            "1️⃣ 🔥 **تريندات وأخبار العمارة:**\n"
+                            "   أرسل `/trends` أو كلمة `تريند` لاستعراض أبرز الموضوعات الشائعة (CNOA، الورشات، ArchDaily)، ثم أرسل رقم الموضوع (مثلاً `1`) ليتم توليد الكاروسيل كاملاً فوراً.\n\n"
+                            "2️⃣ 🎨 **توليد تصميم معماري من الصفر:**\n"
+                            "   أرسل `/generate` أو `توليد` لإنشاء فيلا/مبنى مع لوحة المفاهيم والبرومبت.\n\n"
+                            "3️⃣ 📥 **إعادة إنتاج منشور إنستغرام:**\n"
+                            "   أرسل أي رابط منشور أو ريلز لنسخه وتطويره بهوية MK ARCHVIZ.\n\n"
+                            "4️⃣ ✍️ **صناعة كاروسيل من أي فكرة:**\n"
+                            "   اكتب أي فكرة أو موضوع (مثل: رخصة البناء، نصائح الـ Jury، أخطاء التسليح) وسأصمم لك كاروسيل هندسي متكامل فوراً! 🚀"
                         )
+                        self.send_message(welcome_msg, reply_to_message_id=msg_id)
                         continue
                         
-                    process_callback(text, msg_id)
+                    try:
+                        process_callback(text, msg_id)
+                    except Exception as err:
+                        print(f"[Callback Error]: {err}")
+                        self.send_message(f"⚠️ حدث خطأ أثناء المعالجة: {str(err)[:150]}", reply_to_message_id=msg_id)
                         
             except requests.exceptions.RequestException:
                 time.sleep(5)
